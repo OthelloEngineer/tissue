@@ -11,9 +11,32 @@ pub trait IssueBoard {
     async fn update_issue(&self, name: &str) -> Result<(), Box<dyn Error>>;
 }
 
+pub struct User {
+    login: String,
+}
+
+pub enum IssueState {
+    Open,
+    Closed,
+    Reopened,
+}
+
 pub struct Issue {
-    pub author: String,
-    pub description: String,
-    pub assigned: Option<String>,
+    pub title: String,
+    #[serde(rename = "user")]
+    pub author: User,
+    pub assignee: Option<User>,
     pub issue_type: IssueType,
+    pub state: IssueState,
+}
+
+impl Issue {
+    fn set_type(&self, label_string: &str) {
+        self.issue_type = match label_string {
+            "feature" => IssueType::Feature,
+            "bug" => IssueType::Bug,
+            "improvement" => IssueType::Improvement,
+            _ => IssueType::Other,
+        };
+    }
 }
