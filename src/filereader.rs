@@ -84,8 +84,13 @@ mod tests {
             Ok(files) => files,
             Err(e) => panic!("Error: {}", e),
         };
-        assert_eq!(files.len(), 8);
-        assert_eq!(files[0].file_path, "examples/example.py");
-        assert_eq!(files[0].lines.len(), 2);
+        
+        let files_len = files.len();
+
+        assert_eq!(files_len, 8);
+
+        let java_file = files.iter().filter(|file| file.file_path == "examples/example.java").next().unwrap();
+        assert_eq!(java_file.file_path, "examples/example.java");
+        assert_eq!(java_file.lines.len(), 2);
     }
 }

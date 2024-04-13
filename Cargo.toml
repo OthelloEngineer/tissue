@@ -6,5 +6,8 @@ exclude = ["examples/example.rs"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = "0.1.80"
 chrono = "0.4.35"
+octocrab = "0.38.0"
 regex = "^1.10.4"
+tokio = {version="1.37", features=["full"]}

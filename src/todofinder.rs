@@ -5,6 +5,14 @@ pub enum IssueType {
     Improvement,
     Other,
 }
+pub fn parse_issue_type(issue_type: &str) -> IssueType {
+    match issue_type {
+        "bug" => IssueType::Bug,
+        "feature" => IssueType::Feature,
+        "improvement" => IssueType::Improvement,
+        _ => IssueType::Other,
+    }
+}
 pub struct ToDo {
     pub submission: Submission,
     pub description: String,
@@ -43,8 +51,8 @@ pub fn parse_submission(submission: Submission) -> Result<ToDo, String> {
             assigned = Some(original_words[i + next_word..].join(" "));
             break;
         }
-        
-        if word.ends_with(";") && words[i + 3].eq("assigned"){
+
+        if word.ends_with(";") && words[i + 3].eq("assigned") {
             description_finished = true;
             let no_semicolon_word = word.trim_end_matches(";");
             description.push_str(format!("{}", no_semicolon_word).as_str());
@@ -103,7 +111,10 @@ mod tests {
         assert_eq!(find_issue_type("other:"), Ok(IssueType::Other));
         assert_eq!(
             find_issue_type("other"),
-            Err("Cannot confirm issue type. Does not end with ':'. Found issue type other".to_string())
+            Err(
+                "Cannot confirm issue type. Does not end with ':'. Found issue type other"
+                    .to_string()
+            )
         );
     }
 
@@ -141,7 +152,9 @@ mod tests {
     fn test_parse_to_do_line_with_assigned_and_semicolon() {
         let submission = Submission {
             line_number: 1,
-            line: String::from("TODO feature: implement this function; now; assigned OthelloEngineer"),
+            line: String::from(
+                "TODO feature: implement this function; now; assigned OthelloEngineer",
+            ),
             file_path: String::from("src/todofinder.rs"),
             issuer: String::from("OthelloEngineer"),
             date: String::from("2021-09-01"),
@@ -150,5 +163,5 @@ mod tests {
         assert_eq!(to_do.description, "implement this function; now");
         assert_eq!(to_do.assigned, Some(String::from("OthelloEngineer")));
         assert_eq!(to_do.issue_type, IssueType::Feature);
-    }   
+    }
 }

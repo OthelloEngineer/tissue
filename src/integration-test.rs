@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::{filereader, githandler, todofinder::{self, Submission}};
+    use crate::{
+        filereader, githandler,
+        todofinder::{self, Submission},
+    };
 
     use super::*;
     use std::fs;
@@ -10,7 +13,7 @@ mod tests {
             Ok(files) => files,
             Err(e) => panic!("Error: {}", e),
         };
-        let mut submissions : Vec<Submission> = Vec::new();
+        let mut submissions: Vec<Submission> = Vec::new();
         for file in files {
             for line in file.lines {
                 let issuer = githandler::blame_user_from_line(&file.file_path, line.0).unwrap();
@@ -26,7 +29,8 @@ mod tests {
                 submissions.push(submission);
             }
         }
-        let todos = submissions.iter()
+        let todos = submissions
+            .iter()
             .filter(|submission| todofinder::is_to_do(&submission.line))
             .collect::<Vec<_>>();
         assert_eq!(todos.len(), 16);

@@ -33,7 +33,7 @@ pub fn get_current_user() -> Result<String, Error> {
     })?;
 
     Ok(user.trim().to_string()) // Trim the output to remove any newline characters
-
+    
 }
 
 pub fn blame_user_from_line(file_path: &str, line_number: usize) -> Result<BlameEntry, Error> {
@@ -88,7 +88,7 @@ mod tests {
             Ok(user) => user,
             Err(e) => panic!("Error: {}", e),
         };
-        assert_eq!(user, "jolee18");
+        assert_eq!(user, "OthelloEngineer");
     }
 
     #[test]
