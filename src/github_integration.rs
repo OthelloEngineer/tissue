@@ -2,7 +2,7 @@ use std::env;
 use std::error::Error;
 
 use async_trait::async_trait;
-use reqwest::header::{self, HeaderMap};
+use reqwest::header::{self, HeaderMap, AUTHORIZATION};
 use reqwest::Client;
 
 use crate::issue_repository::{Issue, IssueBoard};
@@ -12,58 +12,74 @@ use crate::todofinder::ToDo;
 struct GitHubIntegration {
     project: String,
     org: String,
-    client: Client,
 }
 
 impl GitHubIntegration {
     async fn new(org: &str, project: &str) -> GitHubIntegration {
-        let access_token = match env::var("TISSUE_GITHUB_TOKEN") {
-            Ok(token) => token,
-            Err(err) => panic!("No GitHub token found: {}", err),
-        };
-        let mut headers = HeaderMap::new();
-        let mut token = "Bearer ".to_string();
-        token.push_str(&access_token);
-        headers.insert(
-            header::HeaderName::from_static("Authorization"),
-            header::HeaderValue::from_str(&token).unwrap(),
-        );
-        let client = reqwest::Client::builder()
-            .default_headers(headers)
-            .build()
-            .unwrap();
-
         GitHubIntegration {
             project: String::from(project),
             org: String::from(org),
-            client,
         }
     }
 }
 #[async_trait]
 impl IssueBoard for GitHubIntegration {
     async fn get_issues(&self) -> Vec<Issue> {
+        let client = get_http_client();
         let url = format!(
             "https://api.github.com/repos/{}/{}/issues",
             self.org, self.project
         );
-        let reponse_req = self.client.get(url);
-        println!("{:?}", self.client);
-        println!("{:?}", reponse_req);
-        let response = reponse_req.send().await.unwrap();
-        println!("{:?}", response);
-        let issues: Vec<Issue> = response.json::<Vec<Issue>>().await.unwrap();
-        return issues;
+
+        let response = client
+            .get(&url)
+            .bearer_auth(env::var("TISSUE_GITHUB_TOKEN").expect("Token not found"))
+            .header(header::ACCEPT, "application/vnd.github+json")
+            .header("X-GitHub-Api-Version", "2022-11-28")
+            .header(header::USER_AGENT, "tissue")
+            .send()
+            .await
+            .expect("Failed to send request");
+
+        if response.status().is_success() {
+            let issues = response
+                .json::<Vec<Issue>>()
+                .await
+                .expect("Failed to parse JSON");
+            issues
+        } else {
+            eprintln!(
+                "Failed to fetch issues: {:?}",
+                response.text().await.unwrap()
+            );
+            panic!("Failed to fetch issues");
+        }
     }
-    async fn get_issue(&self, name: &str) -> Issue {
-        todo!()
-    }
+    async fn get_issue(&self, number: u32) -> Issue {}
     async fn add_issue(&self, issue: ToDo) -> Result<(), Box<dyn Error>> {
         todo!()
     }
     async fn update_issue(&self, name: &str) -> Result<(), Box<dyn Error>> {
         todo!()
     }
+}
+
+fn get_http_client() -> Client {
+    let access_token = match env::var("TISSUE_GITHUB_TOKEN") {
+        Ok(token) => token,
+        Err(err) => panic!("No GitHub token found: {}", err),
+    };
+    let mut headers = HeaderMap::new();
+    let mut token = "Bearer ".to_string();
+    token.push_str(&access_token);
+    headers.insert(
+        AUTHORIZATION,
+        header::HeaderValue::from_str(&token).unwrap(),
+    );
+    return reqwest::Client::builder()
+        .default_headers(headers)
+        .build()
+        .unwrap();
 }
 
 #[cfg(test)]
@@ -84,6 +100,6 @@ mod tests {
             .iter()
             .find(|issue| issue.title == "test issue".to_string())
             .unwrap();
-        assert_eq!(test_issue.author.login, "OthelloEngineer".to_string())
+        assert_eq!(test_issue.author.name, "OthelloEngineer".to_string())
     }
 }
