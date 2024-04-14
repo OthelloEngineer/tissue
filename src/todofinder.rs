@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq, Eq)]
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 pub enum IssueType {
     Bug,
     Feature,

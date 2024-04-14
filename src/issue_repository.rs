@@ -1,7 +1,8 @@
-use async_trait::async_trait;
-
 use crate::todofinder::{IssueType, ToDo};
-use std::{error::Error, future::Future};
+use async_trait::async_trait;
+use serde::Deserialize;
+use serde::Serialize;
+use std::error::Error;
 
 #[async_trait]
 pub trait IssueBoard {
@@ -11,32 +12,23 @@ pub trait IssueBoard {
     async fn update_issue(&self, name: &str) -> Result<(), Box<dyn Error>>;
 }
 
+#[derive(Debug, Deserialize, PartialEq)]
 pub struct User {
-    login: String,
+    pub login: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum IssueState {
     Open,
     Closed,
     Reopened,
 }
-
+#[derive(Deserialize)]
 pub struct Issue {
     pub title: String,
-    #[serde(rename = "user")]
     pub author: User,
     pub assignee: Option<User>,
     pub issue_type: IssueType,
     pub state: IssueState,
-}
-
-impl Issue {
-    fn set_type(&self, label_string: &str) {
-        self.issue_type = match label_string {
-            "feature" => IssueType::Feature,
-            "bug" => IssueType::Bug,
-            "improvement" => IssueType::Improvement,
-            _ => IssueType::Other,
-        };
-    }
 }

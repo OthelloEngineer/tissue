@@ -2,11 +2,11 @@ use std::env;
 use std::error::Error;
 
 use async_trait::async_trait;
-use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::header::{self, HeaderMap};
 use reqwest::Client;
 
 use crate::issue_repository::{Issue, IssueBoard};
-use crate::todofinder::{parse_issue_type, ToDo};
+use crate::todofinder::ToDo;
 
 #[derive(Debug)]
 struct GitHubIntegration {
@@ -22,13 +22,19 @@ impl GitHubIntegration {
             Err(err) => panic!("No GitHub token found: {}", err),
         };
         let mut headers = HeaderMap::new();
-        headers.insert("bearer", access_token);
-        let client = reqwest::ClientBuilder::default_headers(self, headers)
+        let mut token = "Bearer ".to_string();
+        token.push_str(&access_token);
+        headers.insert(
+            header::HeaderName::from_static("Authorization"),
+            header::HeaderValue::from_str(&token).unwrap(),
+        );
+        let client = reqwest::Client::builder()
+            .default_headers(headers)
             .build()
             .unwrap();
 
         GitHubIntegration {
-            project: String::from(org),
+            project: String::from(project),
             org: String::from(org),
             client,
         }
@@ -41,7 +47,13 @@ impl IssueBoard for GitHubIntegration {
             "https://api.github.com/repos/{}/{}/issues",
             self.org, self.project
         );
-        let reponse = self.client.get(url).await.unwrap();
+        let reponse_req = self.client.get(url);
+        println!("{:?}", self.client);
+        println!("{:?}", reponse_req);
+        let response = reponse_req.send().await.unwrap();
+        println!("{:?}", response);
+        let issues: Vec<Issue> = response.json::<Vec<Issue>>().await.unwrap();
+        return issues;
     }
     async fn get_issue(&self, name: &str) -> Issue {
         todo!()
@@ -70,8 +82,8 @@ mod tests {
         let issues = client.get_issues().await;
         let test_issue = issues
             .iter()
-            .find(|issue| issue.name == "test issue".to_string())
+            .find(|issue| issue.title == "test issue".to_string())
             .unwrap();
-        assert_eq!(test_issue.author, "OthelloEngineer".to_string())
+        assert_eq!(test_issue.author.login, "OthelloEngineer".to_string())
     }
 }
