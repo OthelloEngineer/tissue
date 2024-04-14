@@ -170,6 +170,10 @@ impl IssueBoard for GitHubIntegration {
             Err(color_eyre::Report::msg("Couldn't update issue :("))
         }
     }
+
+    fn get_repository_name(&self) -> String {
+        String::from("GitHub")
+    }
 }
 
 fn get_http_client() -> Client {
@@ -240,6 +244,7 @@ mod tests {
     async fn can_create_issue() {
         let client = GitHubIntegration::new("OthelloEngineer", "tissue").await;
         let new_issue = Issue {
+            body: Some("This is an automatic test issue".to_string()),
             title: "automatic test issue".to_string(),
             assignee: None,
             author: User {

@@ -4,10 +4,10 @@ pub mod filereader;
 pub mod githandler;
 pub mod github_integration;
 pub mod issue_repository;
-pub mod todofinder;
-
 #[path = "integration-test.rs"]
 pub mod tests;
+pub mod tissuebox_repository;
+pub mod todofinder;
 
 fn main() -> Result<()> {
     color_eyre::install()?;

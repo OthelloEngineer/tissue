@@ -10,6 +10,7 @@ pub trait IssueBoard {
     async fn get_issue(&self, number: u32) -> Result<Issue>;
     async fn add_issue(&self, issue: Issue) -> Result<u32>;
     async fn update_issue(&self, number: u32, update: &IssueUpdateRequest) -> Result<()>;
+    fn get_repository_name(&self) -> String;
 }
 
 pub enum IssueUpdateRequest {
@@ -67,6 +68,7 @@ pub struct Issue {
     #[serde(rename = "labels")]
     pub issue_type: Vec<Label>,
     pub state: String,
+    pub body: Option<String>,
 }
 
 impl Issue {

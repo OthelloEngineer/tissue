@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub enum IssueType {
     Bug,
     Feature,
@@ -25,6 +25,8 @@ pub fn parse_issue_type(issue_type: &str) -> IssueType {
         _ => IssueType::Other,
     }
 }
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ToDo {
     pub submission: Submission,
     pub description: String,
@@ -32,7 +34,7 @@ pub struct ToDo {
     pub issue_type: IssueType,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Submission {
     pub line_number: usize,
     pub line: String,
