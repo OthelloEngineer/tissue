@@ -7,6 +7,16 @@ pub enum IssueType {
     Improvement,
     Other,
 }
+impl IssueType {
+    pub fn as_str(&self) -> &str {
+        match self {
+            IssueType::Bug => "bug",
+            IssueType::Feature => "feature",
+            IssueType::Improvement => "improvement",
+            IssueType::Other => "other",
+        }
+    }
+}
 pub fn parse_issue_type(issue_type: &str) -> IssueType {
     match issue_type {
         "bug" => IssueType::Bug,

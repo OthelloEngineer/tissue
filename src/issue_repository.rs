@@ -1,23 +1,42 @@
 use crate::todofinder::{IssueType, ToDo};
 use async_trait::async_trait;
+use color_eyre::eyre::Result;
 use serde::Deserialize;
 use serde::Serialize;
-use std::error::Error;
 
 #[async_trait]
 pub trait IssueBoard {
-    async fn get_issues(&self) -> Vec<Issue>;
-    async fn get_issue(&self, name: &str) -> Issue;
-    async fn add_issue(&self, issue: ToDo) -> Result<(), Box<dyn Error>>;
-    async fn update_issue(&self, name: &str) -> Result<(), Box<dyn Error>>;
+    async fn get_issues(&self) -> Result<Vec<Issue>>;
+    async fn get_issue(&self, number: u32) -> Result<Issue>;
+    async fn add_issue(&self, issue: Issue) -> Result<u32>;
+    async fn update_issue(&self, number: u32, update: &IssueUpdateRequest) -> Result<()>;
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+pub enum IssueUpdateRequest {
+    State(IssueState),
+    Assignee(User),
+    Title(String),
+    IssueType(IssueType),
+    Delete(),
+}
+impl IssueUpdateRequest {
+    pub fn as_str(&self) -> &str {
+        match self {
+            IssueUpdateRequest::State(state) => state.as_str(),
+            IssueUpdateRequest::Assignee(assignee) => assignee.name.as_str(),
+            IssueUpdateRequest::Title(title) => title.as_str(),
+            IssueUpdateRequest::IssueType(issue_type) => issue_type.as_str(),
+            IssueUpdateRequest::Delete() => "delete",
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct User {
     #[serde(rename = "login")]
     pub name: String,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Label {
     pub name: String,
 }
@@ -29,16 +48,25 @@ pub enum IssueState {
     Closed,
     Reopened,
 }
-#[derive(Deserialize)]
+impl IssueState {
+    pub fn as_str(&self) -> &str {
+        match self {
+            IssueState::Open => "open",
+            IssueState::Closed => "closed",
+            IssueState::Reopened => "reopened",
+        }
+    }
+}
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Issue {
-    pub number: u32,
+    pub number: Option<u32>,
     pub title: String,
     #[serde(rename = "user")]
     pub author: User,
     pub assignee: Option<User>,
     #[serde(rename = "labels")]
-    issue_type: Vec<Label>,
-    state: String,
+    pub issue_type: Vec<Label>,
+    pub state: String,
 }
 
 impl Issue {
