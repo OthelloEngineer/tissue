@@ -86,20 +86,24 @@ pub fn blame_user_from_line(file_path: &str, line_number: usize) -> Result<Blame
 }
 
 pub fn changed_lines_per_diffed_file(diff: &str) -> Vec<DiffedFileChangedLines> {
-    let lines = diff.lines();
-    println!("lines: {:?}", lines);
+    let lines = diff.split('\n');
     let mut lines_from_changed_files: Vec<DiffedFileChangedLines> = Vec::new();
+    let mut idx = 0;
     for line in lines {
-        let mut idx = 0;
         println!("line: {:?}", line);
         if line.starts_with("diff") {
-            let file_path = line.split(' ').collect::<Vec<&str>>()[2];
+            let file_path = line.split(' ').collect::<Vec<&str>>()[2]
+                .split("a/")
+                .collect::<Vec<&str>>()[1];
             println!("file_path: {:?}", file_path);
             lines_from_changed_files.push(DiffedFileChangedLines {
                 file_path: file_path.to_string(),
                 changed_lines: Vec::new(),
             });
             idx += 1;
+        }
+        if idx == 0 {
+            continue;
         }
         lines_from_changed_files[idx - 1]
             .changed_lines
@@ -134,8 +138,16 @@ mod tests {
     #[test]
     fn test_changed_lines_per_diffed_file() {
         let diff_lines = fs::read_to_string("examples/git_diff.txt").unwrap();
-        println!("diff_lines: {:?}", diff_lines);
         let changed_lines = changed_lines_per_diffed_file(&diff_lines);
+        let expected_line = "+use async_trait::async_trait;";
+        let line = changed_lines[1]
+            .changed_lines
+            .iter()
+            .find(|line| line.contains(expected_line));
+
+        println!("changed lines from 1 {:?}", changed_lines[1].changed_lines);
         assert_eq!(changed_lines.len(), 2);
+        assert_eq!(changed_lines[0].file_path, "src/main.rs");
+        assert!(line.is_some());
     }
 }

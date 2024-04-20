@@ -49,6 +49,19 @@ pub fn comments_from_file_in_project(directory: &str) -> Result<Vec<FileLines>, 
     Ok(file_lines)
 }
 
+pub fn comments_from_strings(strings: Vec<String>, file_name: String) -> FileLines {
+    let lines: HashMap<usize, String> = strings
+        .iter()
+        .enumerate()
+        .filter(|line| is_comment(line.1))
+        .map(|line| (line.0 + 1, line.1.to_string()))
+        .collect();
+    FileLines {
+        file_path: file_name,
+        lines,
+    }
+}
+
 fn is_comment(line: &str) -> bool {
     line.trim().starts_with("//")
         || line.trim().starts_with("#")
@@ -96,5 +109,15 @@ mod tests {
             .unwrap();
         assert_eq!(java_file.file_path, "examples/example.java");
         assert_eq!(java_file.lines.len(), 2);
+    }
+    #[test]
+    fn test_comments_from_strings() {
+        let strings = vec![
+            "// This is a comment".to_string(),
+            "# This is a comment".to_string(),
+            "this is not a comment".to_string(),
+        ];
+        let lines = comments_from_strings(strings, "example.rs".to_string());
+        assert_eq!(lines.lines.len(), 2);
     }
 }
