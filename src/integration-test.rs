@@ -4,9 +4,6 @@ mod tests {
         filereader, githandler,
         todofinder::{self, Submission},
     };
-
-    use super::*;
-    use std::fs;
     #[test]
     fn find_all_todos() {
         let files = match filereader::comments_from_file_in_project("examples") {

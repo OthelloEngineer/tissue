@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 pub struct FileLines {
     pub file_path: String,
-    pub lines: HashMap<usize, String>
+    pub lines: HashMap<usize, String>,
 }
 fn get_all_files_in_directory(directory: &str) -> Result<Vec<String>, String> {
     let mut files = Vec::new();
@@ -31,7 +31,7 @@ fn read_comments_from_file(file_path: &str) -> Result<FileLines, String> {
         .lines()
         .enumerate()
         .filter(|line| is_comment(line.1))
-        .map(|line| (line.0+1, line.1.to_string()))
+        .map(|line| (line.0 + 1, line.1.to_string()))
         .collect();
     Ok(FileLines {
         file_path: file_path.to_string(),
@@ -66,7 +66,7 @@ mod tests {
             Ok(files) => files,
             Err(e) => panic!("Error: {}", e),
         };
-        assert_eq!(files.len(), 8);
+        assert_eq!(files.len(), 9);
     }
 
     #[test]
@@ -84,12 +84,16 @@ mod tests {
             Ok(files) => files,
             Err(e) => panic!("Error: {}", e),
         };
-        
+
         let files_len = files.len();
 
-        assert_eq!(files_len, 8);
+        assert_eq!(files_len, 9);
 
-        let java_file = files.iter().filter(|file| file.file_path == "examples/example.java").next().unwrap();
+        let java_file = files
+            .iter()
+            .filter(|file| file.file_path == "examples/example.java")
+            .next()
+            .unwrap();
         assert_eq!(java_file.file_path, "examples/example.java");
         assert_eq!(java_file.lines.len(), 2);
     }

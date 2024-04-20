@@ -1,0 +1,64 @@
+diff --git a/src/main.rs b/src/main.rs
+index 3d3ea22..8c82be5 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -1,12 +1,15 @@
+-use std::path;
++use color_eyre::eyre::{Ok, Result};
+
+-
+-pub mod todofinder;
+-pub mod githandler;
+ pub mod filereader;
+-
++pub mod githandler;
++pub mod github_integration;
++pub mod issue_repository;
+ #[path = "integration-test.rs"]
+ pub mod tests;
++pub mod tissuebox_repository;
++pub mod todofinder;
+
+-fn main(){
++fn main() -> Result<()> {
++    color_eyre::install()?;
++    Ok(())
+ }
+diff --git a/src/tissuebox_repository.rs b/src/tissuebox_repository.rs
+new file mode 100644
+index 0000000..c16ff6b
+--- /dev/null
++++ b/src/tissuebox_repository.rs
+@@ -0,0 +1,32 @@
++// Create tissuebox.json if doesn't exist
++//
++// Pull ToDo's from files
++//
++// Diff with tissuebox.json
++//
++// Apply difference to github repository. Save ID of tissues to track them on the repository
++//
++//
++
++use async_trait::async_trait;
++use color_eyre::eyre::Result;
++use serde::{Deserialize, Serialize};
++
++use crate::{
++    issue_repository::{Issue, IssueBoard},
++    todofinder::ToDo,
++};
++
++#[derive(Debug, Serialize, Deserialize)]
++struct Tissue {
++    issue: Issue,
++    todo: ToDo,
++}
++
++#[async_trait]
++trait TissueBoxRepository {
++    async fn compare_and_apply() -> Result<()>;
++    fn get_tissues() -> Result<Vec<Tissue>>;
++    fn add_board(issue_board: &dyn IssueBoard) -> Result<()>;
++    fn remove_board(board_name: &str) -> Result<&dyn IssueBoard>;
++}

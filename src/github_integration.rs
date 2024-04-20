@@ -5,10 +5,10 @@ use color_eyre::eyre::Result;
 use reqwest::header::{self, HeaderMap, AUTHORIZATION};
 use reqwest::Client;
 
-use crate::issue_repository::{Issue, IssueBoard, IssueState, IssueUpdateRequest};
-use crate::todofinder::ToDo;
+use crate::issue_repository::{Issue, IssueBoard, IssueUpdateRequest};
 
 #[derive(Debug)]
+#[warn(dead_code)]
 struct GitHubIntegration {
     project: String,
     org: String,
@@ -196,12 +196,12 @@ fn get_http_client() -> Client {
 
 #[cfg(test)]
 mod tests {
-    use crate::issue_repository::{Issue, IssueBoard, Label, User};
+    use crate::issue_repository::{Issue, IssueBoard};
 
     use super::GitHubIntegration;
     #[tokio::test]
     async fn can_connect_with_github_client() {
-        let client = GitHubIntegration::new("OthelloEngineer", "tissue").await;
+        let _client = GitHubIntegration::new("OthelloEngineer", "tissue").await;
     }
 
     #[tokio::test]

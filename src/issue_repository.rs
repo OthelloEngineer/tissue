@@ -1,4 +1,4 @@
-use crate::todofinder::{IssueType, ToDo};
+use crate::todofinder::IssueType;
 use async_trait::async_trait;
 use color_eyre::eyre::Result;
 use serde::Deserialize;
