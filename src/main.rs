@@ -6,6 +6,7 @@ pub mod github_integration;
 pub mod issue_repository;
 #[path = "integration-test.rs"]
 pub mod tests;
+pub mod tissuebox_file;
 pub mod tissuebox_repository;
 pub mod todofinder;
 

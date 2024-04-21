@@ -42,15 +42,17 @@ use crate::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Tissue {
-    issue: Issue,
-    todo: ToDo,
+pub struct Tissue {
+    pub issue: Issue,
+    pub todo: ToDo,
 }
 
 #[async_trait]
-trait TissueBoxRepository {
-    async fn compare_and_apply() -> Result<()>;
-    fn get_tissues() -> Result<Vec<Tissue>>;
-    fn add_board(issue_board: &dyn IssueBoard) -> Result<()>;
-    fn remove_board(board_name: &str) -> Result<&dyn IssueBoard>;
+pub trait TissueBoxRepository {
+    fn add_tissues(self, tissues: Vec<Tissue>) -> Result<()>;
+    fn remove_tissues(self, tissues: Vec<&Tissue>) -> Result<Vec<Tissue>>;
+    fn update_tissues(self, tissues: Vec<Tissue>) -> Result<()>;
+    fn get_tissues(self) -> Result<Vec<Tissue>>;
+    fn add_board(self, issue_board: &dyn IssueBoard) -> Result<()>;
+    fn remove_board(self, board_name: &str) -> Result<&dyn IssueBoard>;
 }

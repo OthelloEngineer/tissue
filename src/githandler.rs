@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use regex::Regex;
 use std::io::Error;
 use std::process::Command;
@@ -11,6 +12,12 @@ pub struct BlameEntry {
 pub struct DiffedFileChangedLines {
     pub file_path: String,
     pub changed_lines: Vec<String>,
+}
+
+pub fn get_last_commit_hash() -> Result<String> {
+    let output = Command::new("git").args(["rev-parse", "HEAD"]).output()?;
+    let commit_hash = String::from_utf8(output.stdout)?;
+    Ok(commit_hash.trim().to_string())
 }
 
 pub fn get_current_user() -> Result<String, Error> {
